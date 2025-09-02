@@ -1,0 +1,27 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore venvs
+.venv/
+env/
+
+# Ignore build artifacts
+*.egg-info/
+dist/
+build/
+
+# Ignore Git
+.git
+.gitignore
+
+# Ignore Docker
+Dockerfile
+docker-compose.yml
+
+# project files
+pyproject.toml
+.python-version
+README.md
+uv.lock

@@ -1,0 +1,60 @@
+# Docker compose file to build and start containers for fastapi app, celery worker, flower monitor, and redis cache & broker
+
+services:
+  # ------------------------
+  # FastAPI application service
+  # ------------------------
+  fastapi:
+    build: .                       # Build the image from the Dockerfile in the current directory
+    container_name: fastapi_app    # Give the container a fixed name (instead of a random one)
+    restart: always                # Restart the container automatically if it stops or Docker restarts
+    ports:
+      - "8000:8000"                # Expose port 8000 on the host → maps to port 8000 in the container
+    depends_on:
+      - redis                      # Ensure Redis starts before FastAPI (dependency)
+    env_file:
+      - .env                       # Load environment variables from .env file
+
+  # ------------------------
+  # Celery worker service
+  # ------------------------
+  worker:
+    build: .                       # Build image from the same Dockerfile as FastAPI
+    container_name: celery_worker  # Fixed container name for clarity
+    restart: always
+    command: >                     # Override default command → run celery worker with INFO log level
+      celery -A app.celery_worker.celery_app
+      worker --loglevel=info
+    depends_on:
+      - redis                      # Worker needs Redis as broker/result backend
+    env_file:
+      - .env                       # Load same environment variables as FastAPI
+
+  # ------------------------
+  # Celery Flower (monitoring UI for workers & tasks)
+  # ------------------------
+  flower:
+    build: .                       # Build from same Dockerfile (since app code may be reused)
+    container_name: flower_monitor # Fixed name for Flower service
+    restart: always
+    command: >                     # Run Flower on port 5555 with explicit broker & backend config
+      celery -A app.celery_worker.celery_app
+      --broker=redis://redis:6379/0
+      --result-backend=redis://redis:6379/0
+      flower --port=5555
+    ports:
+      - "5555:5555"                # Expose Flower dashboard at http://localhost:5555
+    depends_on:
+      - redis                      # Ensure Redis starts before Flower
+      - worker                     # Ensure Celery worker is up before Flower
+    env_file:
+      - .env                       # Load environment variables (if needed)
+
+  # ------------------------
+  # Redis service (message broker + result backend for Celery)
+  # ------------------------
+  redis:
+    image: redis:7-alpine          # Lightweight Redis image
+    restart: always
+    ports:
+      - "6379:6379"                # Expose Redis on host (optional, useful for local debugging)
