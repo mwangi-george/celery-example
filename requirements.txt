@@ -7,6 +7,7 @@ click==8.2.1
 click-didyoumean==0.3.1
 click-plugins==1.1.1.2
 click-repl==0.3.0
+et-xmlfile==2.0.0
 fastapi==0.116.1
 flower==2.0.1
 h11==0.16.0
@@ -14,6 +15,7 @@ humanize==4.13.0
 idna==3.10
 kombu==5.5.4
 loguru==0.7.3
+openpyxl==3.1.5
 packaging==25.0
 prometheus-client==0.22.1
 prompt-toolkit==3.0.52

@@ -10,9 +10,15 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+
+# Install uv using pip
+RUN pip install --no-cache uv
+
+# Copy requirements file separately for caching
 COPY requirements.txt .
-RUN pip install --no-cache -r requirements.txt
+
+# Install dependencies with uv (instead of pip)
+RUN uv pip install --system --no-cache -r requirements.txt
 
 # Copy application code
 COPY . .
